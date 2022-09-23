@@ -1,1 +1,1 @@
-shell.exec("gitget cliffdevs cc-tweaked-libs")
+shell.run("gitget cliffdevs cc-tweaked-libs")
