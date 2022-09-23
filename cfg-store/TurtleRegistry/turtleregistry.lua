@@ -1,10 +1,10 @@
 local registry = {}
+local protocol = "registry"
 
 local function server()
----@diagnostic disable-next-line: undefined-field
-    rednet.host("registry", "server" .. os.getComputerID())
+    rednet.host(protocol, "server" .. os.getComputerID())
     while true do
-        local senderId, message = rednet.receive("register")
+        local senderId, message = rednet.receive(protocol)
         print("Received registry request for " + senderId)
 
         local registration = textutils.unserialise(message)
@@ -28,14 +28,13 @@ end
 
 local function register(in_role)
     local workerDetails = {
----@diagnostic disable-next-line: undefined-field
         id = os.getComputerID(),
         role = in_role
     }
-    local serverId = rednet.lookup("registry")
+    local serverId = rednet.lookup(protocol)
     print("Found registry server: ", serverId)
 
-    rednet.send(serverId, textutils.serialise(workerDetails), "registry")
+    rednet.send(serverId, textutils.serialise(workerDetails), protocol)
 end
 
 return {
