@@ -1,6 +1,6 @@
-local RedUtils = require("../network-utils/redutils")
-local TurtleRegistry = require("../cfg-store/TurtleRegistry/turtleregistry")
-local Config = require("../cfg-store/Config/config")
+local RedUtils = require("?/../network-utils/redutils")
+local TurtleRegistry = require("?/../cfg-store/TurtleRegistry/turtleregistry")
+local Config = require("?/../cfg-store/Config/config")
 
 RedUtils.openRednet()
 
@@ -39,7 +39,7 @@ local function updateLumberjackConfig()
     local creepId = read()
 
     local coords = {}
-    for var=i,3 do
+    for i=1,3 do
         print("point " .. i .. ", x: ")
         local x = tonumber(read())
 
