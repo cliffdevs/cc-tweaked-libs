@@ -8,10 +8,10 @@ local function server()
     rednet.host(protocol_read_register, "server" .. os.getComputerID())
     while true do
         local senderId, message, protocol = rednet.receive()
-        print("Received registry request for " .. senderId .. " with message " .. message)
+        print("Received registry request for " .. senderId .. " with message " .. textutils.serialise(message))
 
         if protocol == protocol_register then
-            local registration = textutils.unserialise(message)
+            local registration = message
             if registration ~= nil and registration.id ~= nil and registration.role ~= nil then
                 local current = registry[registration.role]
                 if current == nil then
