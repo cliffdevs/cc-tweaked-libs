@@ -29,15 +29,17 @@ local function server()
 end
 
 local function getConfig(creepId)
+    local response = nil
     local function listen()
         local senderId, message, protocol = rednet.receive(protocol_get_response)
-        return message
+        response = textutils.unserialise(message)
     end
-    local listener = coroutine.create(listen)
-    local host = rednet.lookup(protocol_get)
-    rednet.send(host, { creepId = creepId }, protocol_get)
-    local _status, result = coroutine.resume(listener)
-    return result
+    local function request()
+        local host = rednet.lookup(protocol_get)
+        rednet.send(host, { creepId = creepId }, protocol_get)
+    end
+    parallel.waitForAll(listen, request)
+    return response
 end
 
 return {
