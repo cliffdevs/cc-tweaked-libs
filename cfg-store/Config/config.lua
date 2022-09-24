@@ -9,19 +9,20 @@ local function server()
     rednet.host(protocol_put, "server" .. os.getComputerID())
     while true do
         local senderId, message, protocol = rednet.receive(protocol_put)
-        print("Received config request from " .. senderId .. " with protocol " .. protocol)
+        print("Received config request from " .. senderId .. " with protocol " .. protocol .. " and message " .. message)
 
+        local request = textutils.unserialise(message)
         if protocol == protocol_get then
-            local requestedConfig = config[message.creepId]
+            local requestedConfig = config[request.creepId]
             if requestedConfig == nil then requestedConfig = {} end
-            print("Received request to read creep config for " .. message.creepId)
+            print("Received request to read creep config for " .. request.creepId)
 
             rednet.send(senderId, requestedConfig, protocol_get_response)
         end
 
         if protocol == protocol_put then
-            config[message.creepId] = message
-            print("Updated config for creepId " .. message.creepId)
+            config[request.creepId] = request
+            print("Updated config for creepId " .. request.creepId)
         end
         
     end

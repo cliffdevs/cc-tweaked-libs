@@ -55,7 +55,7 @@ local function updateLumberjackConfig()
     }
 
     print("Update config for creep=" .. creepId)
-    print(textutils.serialise(Config.getConfig()[creepId]))
+    print(textutils.serialise(Config.getConfig(creepId)))
 end
 
 local function updateConfig()
