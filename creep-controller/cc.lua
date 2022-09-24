@@ -1,6 +1,6 @@
-local RedUtils = require("?/../network-utils/redutils")
-local TurtleRegistry = require("?/../cfg-store/TurtleRegistry/turtleregistry")
-local Config = require("?/../cfg-store/Config/config")
+local RedUtils = require("../network-utils/redutils")
+local TurtleRegistry = require("../cfg-store/TurtleRegistry/turtleregistry")
+local Config = require("../cfg-store/Config/config")
 
 RedUtils.openRednet()
 
