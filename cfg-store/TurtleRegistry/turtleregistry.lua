@@ -31,7 +31,8 @@ end
 
 local function listen_protocol_read_register()
     while true do
-        local senderId, message, protocol = rednet.host(protocol_read_register, "server" .. os.getComputerID())
+        rednet.host(protocol_read_register, "server" .. os.getComputerID())
+        local senderId, message, protocol = rednet.receive(protocol_read_register)
         print("Received registry read request: " .. senderId .. " " .. textutils.serialiseJSON(message) .. " " .. protocol)
         rednet.send(senderId, textutils.serialise(registry), protocol_read_register_response)
         print("Returned registry snapshot")
