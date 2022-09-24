@@ -53,7 +53,7 @@ local function getRegistry()
     end
     local listener = coroutine.create(listen)
     local host = rednet.lookup(protocol_read_register)
-    rednet.send(host, nil, protocol_read_register)
+    rednet.send(host, "get", protocol_read_register)
     local _status, value = coroutine.resume(listener)
     return value
 end
