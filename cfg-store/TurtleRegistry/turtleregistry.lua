@@ -7,6 +7,7 @@ local function listen_protocol_register()
     rednet.host(protocol_register, "server" .. os.getComputerID())
     while true do
         local senderId, message, protocol = rednet.receive(protocol_register)
+        print("Received protocol registration request: " .. senderId .. " " ..textutils.serialiseJSON(message) .. " " .. protocol)
         local registration = textutils.unserialise(message)
         if registration ~= nil and registration.id ~= nil and registration.role ~= nil then
             local current = registry[registration.role]
@@ -31,6 +32,7 @@ end
 local function listen_protocol_read_register()
     while true do
         local senderId, message, protocol = rednet.host(protocol_read_register, "server" .. os.getComputerID())
+        print("Received registry read request: " .. senderId .. " " .. textutils.serialiseJSON(message) .. " " .. protocol)
         rednet.send(senderId, textutils.serialise(registry), protocol_read_register_response)
         print("Returned registry snapshot")
     end
