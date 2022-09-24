@@ -12,18 +12,16 @@ local function server()
         print("Received config request from " .. senderId .. " with protocol " .. protocol)
 
         if protocol == protocol_get then
-            local configRequest = textutils.unserialise(message)
-            local requestedConfig = config[configRequest.creepId]
+            local requestedConfig = config[message.creepId]
             if requestedConfig == nil then requestedConfig = {} end
-            print("Received request to read creep config for " .. configRequest.creepId)
+            print("Received request to read creep config for " .. message.creepId)
 
-            rednet.send(senderId, textutils.serialise(requestedConfig), protocol_get_response)
+            rednet.send(senderId, requestedConfig, protocol_get_response)
         end
 
         if protocol == protocol_put then
-            local configRequest = textutils.unserialise(message)
-            config[configRequest.creepId] = configRequest
-            print("Updated config for creepId " .. configRequest.creepId)
+            config[message.creepId] = message
+            print("Updated config for creepId " .. message.creepId)
         end
         
     end
@@ -32,11 +30,11 @@ end
 local function getConfig(creepId)
     local function listen()
         local senderId, message, protocol = rednet.receive(protocol_get_response)
-        return textutils.unserialise(message)
+        return message
     end
     local listener = coroutine.create(listen)
     local host = rednet.lookup(protocol_get)
-    rednet.send(host, textutils.serialise({ creepId = creepId }), protocol_get)
+    rednet.send(host, { creepId = creepId }, protocol_get)
     local _status, result = coroutine.resume(listener)
     return result
 end

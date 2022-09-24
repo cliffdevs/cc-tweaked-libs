@@ -31,7 +31,7 @@ local function server()
             end
         end
         if protocol == protocol_read_register then
-            rednet.send(senderId, textutils.serialise(registry), protocol_read_register_response)
+            rednet.send(senderId, registry, protocol_read_register_response)
             print("Returned registry snapshot")
         end
     end
@@ -45,13 +45,13 @@ local function register(in_role)
     local serverId = rednet.lookup(protocol_register)
     print("Found registry server: ", serverId)
 
-    rednet.send(serverId, textutils.serialise(workerDetails), protocol_register)
+    rednet.send(serverId, workerDetails, protocol_register)
 end
 
 local function getRegistry()
     local function listen()
         local senderId, message, protocol = rednet.receive(protocol_read_register_response)
-        return textutils.unserialise(message)
+        return message
     end
     local listener = coroutine.create(listen)
     local host = rednet.lookup(protocol_read_register)
