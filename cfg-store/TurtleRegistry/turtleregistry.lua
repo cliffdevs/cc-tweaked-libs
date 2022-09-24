@@ -8,7 +8,7 @@ local function server()
     rednet.host(protocol_read_register, "server" .. os.getComputerID())
     while true do
         local senderId, message, protocol = rednet.receive()
-        print("Received registry request for " .. senderId .. " with message " .. textutils.serialise(message))
+        print("Received registry request for " .. senderId .. " with message " .. textutils.serialiseJSON(message))
 
         if protocol == protocol_register then
             local registration = textutils.unserialise(message)
@@ -52,7 +52,7 @@ local function getRegistry()
     local response = nil
     local function listen()
         local senderId, message, protocol = rednet.receive(protocol_read_register_response)
-        response =  textutils.unserialise(message)
+        response = textutils.unserialise(message)
     end
     local function request()
         local host = rednet.lookup(protocol_read_register)

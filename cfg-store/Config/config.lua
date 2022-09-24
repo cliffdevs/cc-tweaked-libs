@@ -9,22 +9,23 @@ local function server()
     rednet.host(protocol_put, "server" .. os.getComputerID())
     while true do
         local senderId, message, protocol = rednet.receive(protocol_put)
-        print("Received config request from " .. senderId .. " with protocol " .. protocol .. " and message " .. message)
+        print("Received config request from " .. senderId .. " with protocol " .. protocol .. " and message " .. textutils.serialiseJSON(message))
 
         local request = textutils.unserialise(message)
-        if protocol == protocol_get then
-            local requestedConfig = config[request.creepId]
-            if requestedConfig == nil then requestedConfig = {} end
-            print("Received request to read creep config for " .. request.creepId)
+        if request.creepId ~= nil then
+            if protocol == protocol_get then
+                local requestedConfig = config[request.creepId]
+                if requestedConfig == nil then requestedConfig = {} end
+                print("Received request to read creep config for " .. request.creepId)
 
-            rednet.send(senderId, requestedConfig, protocol_get_response)
-        end
+                rednet.send(senderId, textutils.serialise(requestedConfig), protocol_get_response)
+            end
 
-        if protocol == protocol_put then
-            config[request.creepId] = request
-            print("Updated config for creepId " .. request.creepId)
+            if protocol == protocol_put then
+                config[request.creepId] = request
+                print("Updated config for creepId " .. request.creepId)
+            end
         end
-        
     end
 end
 
@@ -36,7 +37,7 @@ local function getConfig(creepId)
     end
     local function request()
         local host = rednet.lookup(protocol_get)
-        rednet.send(host, { creepId = creepId }, protocol_get)
+        rednet.send(host, textutils.serialise({ creepId = creepId }), protocol_get)
     end
     parallel.waitForAll(listen, request)
     return response
