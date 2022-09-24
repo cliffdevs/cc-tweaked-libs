@@ -8,25 +8,27 @@ local function server()
     rednet.host(protocol_read_register, "server" .. os.getComputerID())
     while true do
         local senderId, message, protocol = rednet.receive()
-        print("Received registry request for " + senderId)
+        print("Received registry request for " .. senderId)
 
         if protocol == protocol_register then
             local registration = textutils.unserialise(message)
-            local current = registry[registration.role]
-            if current == nil then
-                current = {}
+            if registration.id ~= nil and registration.role ~= nil then
+                local current = registry[registration.role]
+                if current == nil then
+                    current = {}
+                end
+
+                if registry[registration.role] == nil then
+                    registry[registration.role] = {}
+                end
+
+                registry[registration.role][registration.id] = { 
+                    lastTime = os.time(),
+                }
+
+                print("registry updated!")
+                print(textutils.serialise(registry))
             end
-
-            if registry[registration.role] == nil then
-                registry[registration.role] = {}
-            end
-
-            registry[registration.role][registration.id] = { 
-                lastTime = os.time(),
-            }
-
-            print("registry updated!")
-            print(textutils.serialise(registry))
         end
         if protocol == protocol_read_register then
             rednet.send(senderId, textutils.serialise(registry), protocol_read_register_response)
