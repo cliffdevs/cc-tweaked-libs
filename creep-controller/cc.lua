@@ -6,7 +6,7 @@ local function intro()
 end
 
 local function menu(options)
-    for i=1,options.length do
+    for i=1,#options do
         print(i .. " " .. options[i].name)
     end
 
