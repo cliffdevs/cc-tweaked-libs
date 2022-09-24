@@ -3,38 +3,41 @@ local protocol_register = "registry"
 local protocol_read_register = "read_registry"
 local protocol_read_register_response = "read_registry_response"
 
-local function server()
+local function listen_protocol_register()
     rednet.host(protocol_register, "server" .. os.getComputerID())
-    rednet.host(protocol_read_register, "server" .. os.getComputerID())
     while true do
-        local senderId, message, protocol = rednet.receive()
-        print("Received registry request for " .. senderId .. " with message " .. textutils.serialiseJSON(message))
-
-        if protocol == protocol_register then
-            local registration = textutils.unserialise(message)
-            if registration ~= nil and registration.id ~= nil and registration.role ~= nil then
-                local current = registry[registration.role]
-                if current == nil then
-                    current = {}
-                end
-
-                if registry[registration.role] == nil then
-                    registry[registration.role] = {}
-                end
-
-                registry[registration.role][registration.id] = { 
-                    lastTime = os.time(),
-                }
-
-                print("registry updated!")
-                print(textutils.serialise(registry))
+        local senderId, message, protocol = rednet.receive(protocol_register)
+        local registration = textutils.unserialise(message)
+        if registration ~= nil and registration.id ~= nil and registration.role ~= nil then
+            local current = registry[registration.role]
+            if current == nil then
+                current = {}
             end
-        end
-        if protocol == protocol_read_register then
-            rednet.send(senderId, textutils.serialise(registry), protocol_read_register_response)
-            print("Returned registry snapshot")
+
+            if registry[registration.role] == nil then
+                registry[registration.role] = {}
+            end
+
+            registry[registration.role][registration.id] = { 
+                lastTime = os.time(),
+            }
+
+            print("registry updated!")
+            print(textutils.serialise(registry))
         end
     end
+end
+
+local function listen_protocol_read_register()
+    while true do
+        local senderId, message, protocol = rednet.host(protocol_read_register, "server" .. os.getComputerID())
+        rednet.send(senderId, textutils.serialise(registry), protocol_read_register_response)
+        print("Returned registry snapshot")
+    end
+end
+
+local function server()
+    parallel.waitForAny(listen_protocol_register, listen_protocol_read_register)
 end
 
 local function register(in_role)
