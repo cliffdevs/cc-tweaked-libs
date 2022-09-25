@@ -28,6 +28,7 @@ local function blocking_request(destinationId, message, protocol)
     local response = nil
     local function listen()
         local senderId, _message, _protocol = rednet.receive(protocol .. "_response")
+        print("Received response: " .. senderId .. " " .. _message .. " " .. _protocol)
         response = textutils.unserialise(message)
     end
     local function request()
@@ -39,7 +40,9 @@ local function blocking_request(destinationId, message, protocol)
 end
 
 local function respond(targetId, message, protocol)
-    rednet.send(targetId, textutils.serialise(message), protocol .. "_response")
+    local response = textutils.serialise(message)
+    rednet.send(targetId, response, protocol .. "_response")
+    print("Sent response: " .. targetId .. " " .. response .. " " .. protocol)
 end
 
 return {
