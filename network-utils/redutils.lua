@@ -28,8 +28,8 @@ local function blocking_request(destinationId, message, protocol)
     local response = nil
     local function listen()
         local senderId, _message, _protocol = rednet.receive(protocol .. "_response")
-        print("Received response: " .. senderId .. " " .. _message .. " " .. _protocol)
-        response = textutils.unserialise(message)
+        print("Received response: " .. senderId .. " " .. textutils.serialiseJSON(_message) .. " " .. _protocol)
+        response = textutils.unserialise(_message)
     end
     local function request()
         local host = rednet.lookup(protocol)
