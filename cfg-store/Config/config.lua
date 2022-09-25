@@ -44,5 +44,6 @@ end
 
 return {
     server = server,
-    getConfig = getConfig
+    getConfig = getConfig,
+    updateConfig = updateConfig
 }
