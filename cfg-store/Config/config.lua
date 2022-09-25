@@ -1,18 +1,9 @@
+local RedUtils = require("../../network-utils/redutils")
+
 local protocol_get = "getconfig"
-local protocol_get_response = "getconfigresponse"
 local protocol_put = "putconfig"
 
 local config = {}
-
-local function listen_for(protocol, callback)
-    rednet.host(protocol, "server" .. os.getComputerID())
-    while true do
-        local senderId, message, _proto = rednet.receive(protocol)
-        print("Received request: " .. senderId .. " " .. textutils.serialiseJSON(message) .. " " .. _proto)
-        local payload = textutils.unserialise(message)
-        callback(payload, senderId)
-    end
-end
 
 local function listen_protocol_get()
     local function handle(request, senderId)
@@ -21,10 +12,10 @@ local function listen_protocol_get()
             local requestedConfig = config[request.creepId]
             if requestedConfig == nil then requestedConfig = {} end
 
-            rednet.send(senderId, textutils.serialise(requestedConfig), protocol_get_response)
+            RedUtils.respond(senderId, requestedConfig, protocol_get)
         end
     end
-    listen_for(protocol_get, handle)
+    RedUtils.listen_for(protocol_get, handle)
 end
 
 local function listen_protocol_put()
@@ -35,7 +26,7 @@ local function listen_protocol_put()
         end
     end
 
-    listen_for(protocol_put, handle)
+    RedUtils.listen_for(protocol_put, handle)
 end
 
 local function server()
@@ -43,17 +34,7 @@ local function server()
 end
 
 local function getConfig(creepId)
-    local response = nil
-    local function listen()
-        local senderId, message, protocol = rednet.receive(protocol_get_response)
-        response = textutils.unserialise(message)
-    end
-    local function request()
-        local host = rednet.lookup(protocol_get)
-        rednet.send(host, textutils.serialise({ creepId = creepId }), protocol_get)
-    end
-    parallel.waitForAll(listen, request)
-    return response
+    return RedUtils.blocking_request(creepId, { creepId = creepId }, protocol_get)
 end
 
 return {

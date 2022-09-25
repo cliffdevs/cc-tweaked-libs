@@ -23,15 +23,11 @@ local function listCreeps()
     print(textutils.serialise(TurtleRegistry.getRegistry()))
 end
 
-local function printConfig()
-    print(textutils.serialise(Config.getConfig()))
-end
-
 local function getConfig()
     print("Which config do you want to read?")
     local value = read()
 
-    print(textutils.serialise(Config.getConfig()[value]))
+    print(textutils.serialise(Config.getConfig(value)))
 end
 
 local function updateLumberjackConfig()
@@ -72,7 +68,6 @@ end
 local function mainMenu()
     local options = {
         { method = listCreeps, name = "List Creeps" },
-        { method = printConfig, name = "Print Configs" },
         { method = getConfig, name = "Get Config" },
         { method = updateConfig, name = "Update Config" }
     }

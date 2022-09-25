@@ -14,6 +14,37 @@ local function openRednet()
     end
 end
 
+local function listen_for(protocol, callback)
+    rednet.host(protocol, "server" .. os.getComputerID())
+    while true do
+        local senderId, message, _proto = rednet.receive(protocol)
+        print("Received message from: " .. senderId .. " " .. textutils.serialiseJSON(message) .. " " .. _proto)
+        local payload = textutils.unserialise(message)
+        callback(payload, senderId)
+    end
+end
+
+local function blocking_request(destinationId, message, protocol)
+    local response = nil
+    local function listen()
+        local senderId, _message, _protocol = rednet.receive(protocol .. "_response")
+        response = textutils.unserialise(message)
+    end
+    local function request()
+        local host = rednet.lookup(protocol)
+        rednet.send(host, textutils.serialise(message), protocol)
+    end
+    parallel.waitForAll(listen, request)
+    return response
+end
+
+local function respond(targetId, message, protocol)
+    rednet.send(targetId, textutils.serialise(message), protocol .. "_response")
+end
+
 return {
-    openRednet = openRednet
+    openRednet = openRednet,
+    listen_for = listen_for,
+    blocking_request = blocking_request,
+    respond = respond
 }
