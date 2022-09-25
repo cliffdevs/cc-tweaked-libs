@@ -48,12 +48,12 @@ local function updateLumberjackConfig()
         coords[i] = { x = x, y = y, z = z }
     end
 
-    Config.getConfig()[creepId] = {
+    local creepConfig = {
         role = "lumberjack",
         coordinates = coords
     }
 
-    print("Update config for creep=" .. creepId)
+    Config.updateConfig(creepConfig)
     print(textutils.serialise(Config.getConfig(creepId)))
 end
 
