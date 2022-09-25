@@ -4,29 +4,42 @@ local protocol_put = "putconfig"
 
 local config = {}
 
-local function server()
-    rednet.host(protocol_get,  "server" .. os.getComputerID())
-    rednet.host(protocol_put, "server" .. os.getComputerID())
+local function listen_for(protocol, callback)
+    rednet.host(protocol, "server" .. os.getComputerID())
     while true do
-        local senderId, message, protocol = rednet.receive(protocol_put)
-        print("Received config request from " .. senderId .. " with protocol " .. protocol .. " and message " .. textutils.serialiseJSON(message))
+        local senderId, message, _proto = rednet.receive(protocol)
+        print("Received request: " .. senderId .. " " .. textutils.serialiseJSON(message) .. " " .. _proto)
+        local payload = textutils.unserialise(message)
+        callback(payload, senderId)
+    end
+end
 
-        local request = textutils.unserialise(message)
+local function listen_protocol_get()
+    local function handle(request, senderId)
         if request.creepId ~= nil then
-            if protocol == protocol_get then
-                local requestedConfig = config[request.creepId]
-                if requestedConfig == nil then requestedConfig = {} end
-                print("Received request to read creep config for " .. request.creepId)
+            print("Received request to read creep config for " .. request.creepId)
+            local requestedConfig = config[request.creepId]
+            if requestedConfig == nil then requestedConfig = {} end
 
-                rednet.send(senderId, textutils.serialise(requestedConfig), protocol_get_response)
-            end
-
-            if protocol == protocol_put then
-                config[request.creepId] = request
-                print("Updated config for creepId " .. request.creepId)
-            end
+            rednet.send(senderId, textutils.serialise(requestedConfig), protocol_get_response)
         end
     end
+    listen_for(protocol_get, handle)
+end
+
+local function listen_protocol_put()
+    local function handle(request, senderId)
+        if request.creepId ~= nil then
+            print("Received request to update creep config " .. request.creepId)
+            config[request.creepId] = request
+        end
+    end
+
+    listen_for(protocol_put, handle)
+end
+
+local function server()
+    parallel.waitForAny(listen_protocol_get, listen_protocol_put)
 end
 
 local function getConfig(creepId)
